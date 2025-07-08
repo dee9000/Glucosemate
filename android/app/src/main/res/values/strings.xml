@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">glucosemate</string>
+    <string name="title_activity_main">glucosemate</string>
+    <string name="package_name">com.dotun.glucosemate</string>
+    <string name="custom_url_scheme">com.dotun.glucosemate</string>
+</resources>
