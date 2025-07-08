@@ -5,10 +5,11 @@ import { defineStore } from 'pinia'
 export const useUserStore = defineStore('user', {
   // 🧠 Reactive state for anything user-related (name, glucose, etc.)
   state: () => ({
-    name: localStorage.getItem('username') || '', // User's name (persists)
-    glucoseToday: 5.7, // Glucose value for today (sample)
-    medicationTime: '8 PM', // Example time Metformin was taken
-      mealNote: '' // 🆕 new state
+    name: localStorage.getItem('username') || '',     // User's name (persists)
+    glucoseToday: 5.7,                                // Most recent glucose value
+    medicationTime: '8 PM',                           // Medication reminder
+    mealNote: '',                                     // Most recent meal/note
+    glucoseHistory: []                                // 🆕 Glucose log over time
   }),
 
   actions: {
@@ -18,21 +19,29 @@ export const useUserStore = defineStore('user', {
       localStorage.setItem('username', newName)
     },
 
-    // 🔁 Reset everything to default (used by the Reset button)
+    // 🔁 Add a glucose value + update the current one
+    updateGlucose(value) {
+      this.glucoseToday = value
+
+      this.glucoseHistory.push({
+        value,
+        date: new Date().toISOString()
+      })
+    },
+
+    // 📝 Update meal or note text
+    updateMealNote(note) {
+      this.mealNote = note
+    },
+
+    // 🔄 Reset all data and clear localStorage
     resetData() {
       this.name = ''
       this.glucoseToday = null
       this.medicationTime = ''
-      localStorage.removeItem('username') // Clear local storage too
-    },
-    
-      updateGlucose(value) {
-      this.glucoseToday = value
-    },
-
-    updateMealNote(note) {
-    this.mealNote = note
-  }
-
+      this.mealNote = ''
+      this.glucoseHistory = []
+      localStorage.removeItem('username')
+    }
   }
 })

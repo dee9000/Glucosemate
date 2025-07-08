@@ -48,15 +48,14 @@
         <p>Log<br /><span>Blood Sugar</span></p>
       </div>
 
-      <!-- Add Meal -->
-        <div class="action-card yellow" @click="toggleMealForm">
+      <!-- Add Meal Card -->
+      <div class="action-card yellow" @click="toggleMealForm">
         <font-awesome-icon icon="utensils" />
         <p>Add<br /><span>Meal/Note</span></p>
-        </div>
+      </div>
 
-
-      <!-- View Trends -->
-      <div class="action-card action-card--green">
+      <!-- View Trends Card -->
+      <div class="action-card action-card--green" @click="toggleChart">
         <font-awesome-icon icon="chart-bar" />
         <p>View<br /><span>Trends</span></p>
       </div>
@@ -68,23 +67,10 @@
       </div>
     </div>
 
-    <div v-if="showMealForm" class="meal-form">
-  <textarea
-    v-model="mealInput"
-    rows="3"
-    placeholder="What did you eat or want to note?"
-  ></textarea>
-  <button @click="saveMealNote">Save</button>
-</div>
+    <!-- Show Chart if toggled -->
+    <GlucoseChart v-if="showChart" :history="user.glucoseHistory" />
 
-<!-- Optional: Show last saved note -->
-<div v-if="user.mealNote" class="meal-note-display">
-  <p><strong>Last note:</strong> {{ user.mealNote }}</p>
-</div>
-
-    
-
-    <!-- Glucose Input Form (outside grid for layout flow) -->
+    <!-- Glucose Input Form -->
     <div v-if="showGlucoseForm" class="glucose-form">
       <input
         v-model="glucoseInput"
@@ -95,6 +81,21 @@
         placeholder="e.g. 5.7"
       />
       <button @click="saveGlucose">Save</button>
+    </div>
+
+    <!-- Meal Note Form -->
+    <div v-if="showMealForm" class="meal-form">
+      <textarea
+        v-model="mealInput"
+        rows="3"
+        placeholder="What did you eat or want to note?"
+      ></textarea>
+      <button @click="saveMealNote">Save</button>
+    </div>
+
+    <!-- Display Last Note if available -->
+    <div v-if="user.mealNote" class="meal-note-display">
+      <p><strong>Last note:</strong> {{ user.mealNote }}</p>
     </div>
 
     <!-- Reset Button -->
@@ -115,32 +116,37 @@
 <script setup>
 import { useUserStore } from '../stores/userStore'
 import { ref, computed } from 'vue'
+import GlucoseChart from '../components/GlucoseChart.vue'
 
 const user = useUserStore()
 const displayName = computed(() => user.name || 'Guest')
 
-const nameInput = ref(user.name)
-const showGlucoseForm = ref(false)
-const glucoseInput = ref(user.glucoseToday ?? '')
+// Chart toggle
+const showChart = ref(false)
+function toggleChart() {
+  showChart.value = !showChart.value
+}
 
-// Save user's name
+// Name input handling
+const nameInput = ref(user.name)
 function saveName() {
   if (nameInput.value.trim() !== '') {
     user.setName(nameInput.value.trim())
   }
 }
 
-// Reset all data
+// Reset user data
 function resetData() {
   user.resetData()
   nameInput.value = ''
 }
 
-// Toggle and save glucose
+// Glucose logging
+const showGlucoseForm = ref(false)
+const glucoseInput = ref(user.glucoseToday ?? '')
 function toggleGlucoseForm() {
   showGlucoseForm.value = !showGlucoseForm.value
 }
-
 function saveGlucose() {
   const value = parseFloat(glucoseInput.value)
   if (!isNaN(value)) {
@@ -149,20 +155,18 @@ function saveGlucose() {
   }
 }
 
+// Meal note handling
 const showMealForm = ref(false)
 const mealInput = ref(user.mealNote ?? '')
-
 function toggleMealForm() {
   showMealForm.value = !showMealForm.value
 }
-
 function saveMealNote() {
   if (mealInput.value.trim()) {
     user.updateMealNote(mealInput.value.trim())
     showMealForm.value = false
   }
 }
-
 </script>
 
 
